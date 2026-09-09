@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-项目规范已固定；功能尚未实现。当前仅建立本地 Git 管理，不创建远程仓库或推送。生产订阅地址尚不存在。
+S1 本地转换与自动化测试已通过。当前可以在本地读取上游并生成稳定的状态文件和 ICS；GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未实施。仓库仍只有本地 Git 管理，没有远程或生产订阅地址。
 
 ## 已确认范围
 
@@ -35,12 +35,40 @@
 
 ## 运行与验证
 
-当前没有可运行脚本或测试，不应把下列计划命令当成已执行结果。S1 实现后补全环境安装与运行命令，测试入口固定为：
+目标运行时是 Python 3.12。先创建项目专用虚拟环境并安装已固定版本的依赖：
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 ```
+
+运行离线自动化测试：
+
+```bash
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+从唯一生产上游同步一次：
+
+```bash
+.venv/bin/python scripts/sync_reset.py
+```
+
+也可以用固定样例做不访问网络的本地转换；为避免覆盖生产路径，这里显式指定临时输出位置：
+
+```bash
+.venv/bin/python scripts/sync_reset.py \
+  --input-file tests/fixtures/reset_scheduled.json \
+  --state-file /tmp/codex-reset-current.json \
+  --output /tmp/codex-reset-calendar.ics
+```
+
+正式本地结果写入 `data/current.json` 和 `public/calendar/codex-reset.ics`。同步会先完整校验并生成两个候选文件；失败时保留上次成功结果。相同有效输入不会改变文件字节。
+
+S1 已在 2026-09-09 使用 Python 3.12 和 `icalendar==7.3.0` 运行 22 项测试，结果全部通过；实时上游核对当时为 `state=none`、零事件，重复同步无文件变化。此证据不代表云端或 iPhone 已验收。
 
 ## 来源与边界
 
 数据来自 [The Reset Company](https://github.com/yuanlang12/The-Reset-Company)。本项目不是 OpenAI 官方服务，不读取个人账户、不执行额度重置。上游时间可能为近似值，订阅日历不是实时推送。
+
+第三方组件的版本、用途与许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

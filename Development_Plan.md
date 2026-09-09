@@ -30,7 +30,7 @@ https://raw.githubusercontent.com/yuanlang12/The-Reset-Company/main/public/data/
               → 当前状态 JSON + ICS → Pages 明确部署 → Apple 日历
 ```
 
-Python 3.12 为目标运行时；标准库负责 HTTP、字段校验、JSON、文件比较及 unittest；icalendar 负责 ICS 序列化。固定经验证的稳定版本及依赖，不使用开发预览版。icalendar 采用 BSD-2-Clause，保留来源与许可证说明；维护成本为依赖更新和兼容检查。参考 [官方文档](https://icalendar.readthedocs.io/en/stable/)。
+Python 3.12 为目标运行时；标准库负责 HTTP、字段校验、JSON、文件比较及 unittest；icalendar 负责 ICS 序列化。S1 固定 `icalendar==7.3.0` 及其传递依赖，不使用开发预览版。icalendar 采用 BSD-2-Clause，来源与许可证说明见 THIRD_PARTY_NOTICES.md；维护成本为依赖更新和兼容检查。参考 [官方文档](https://icalendar.readthedocs.io/en/stable/)。
 
 建议工程职责：scripts/sync_reset.py 为同步入口；data/current.json 保存规范化事件与版本元数据；public/calendar/codex-reset.ics 为生产产物；tests/ 放固定样例和测试；.github/workflows/ 放自动化。依赖锁定和具体辅助函数由对应阶段按最小实现落地，不增加配置框架。
 

@@ -9,6 +9,15 @@
 3. 对照 UTC 时间、UID、事件数量、来源和双提醒；2026-09-08T02:00:00Z 的上海时间应为 10:00、东京为 11:00，此值只是固定测试样例。
 4. 再次处理相同输入，确认输出无变化。
 
+### S1 执行记录（2026-09-09）
+
+- Python：3.12；icalendar：7.3.0。
+- 自动化测试：`.venv/bin/python -m unittest discover -s tests -v`，22 项通过，退出码 0。
+- 实时读取开始时间：2026-09-09T10:04:14Z（北京时间 18:04:14）。规范化结果为 `state=none`、`resetAt=null`、零事件；未保存 `sourceText`。
+- ICS 解析结果：日历名称为“Codex 重置日历”，事件数为 0，使用 UTF-8 与 CRLF。
+- 重复同步返回 `changed=false`；`data/current.json` 的 SHA-256 为 `30df6aa26e1646ed1237eed67cd669767ec3aa517c915d5745d89dce2fa5f780`，`public/calendar/codex-reset.ics` 为 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`，两次一致。
+- 固定事件样例已自动核对 UTC、UID、版本、中文、来源与两个 VALARM；两个提醒仍需 S4 iPhone 实机观察。
+
 ## S2 发布前准备
 
 检查工作流触发、权限、串行行为；模拟首次发布、无变化、线上不匹配及部署恢复；回归通过。公共产物清单不含状态文件、密钥、日志或其他用户数据。尚无 GitHub 实际运行时明确写“云端待验证”。
