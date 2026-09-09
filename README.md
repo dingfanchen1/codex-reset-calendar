@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-S2 自动化工作流与发布准备已在本地完成。当前已有定时/手动/默认分支/拉取请求流程、内容变化提交、Pages 明确部署、线上字节比较与失败恢复逻辑；实际 GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未执行。仓库仍只有本地 Git 管理，没有远程或生产订阅地址。
+S3 发布前检查已通过，当前等待单独的公开发布授权。拟定目标为 GitHub 账号 `dingfanchen1` 下的公开仓库 `codex-reset-calendar`；截至 2026-09-09T15:40:38Z，该仓库不存在，本地也未配置远程。实际 GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未执行，生产订阅地址仍不存在。
 
 ## 已确认范围
 
