@@ -38,6 +38,8 @@ KNOWN_STATES = {
 EXPECTED_SOURCE_AUTHOR = "thsottiaux"
 STATE_SCHEMA_VERSION = 1
 CALENDAR_PRODID = "-//Codex Reset Calendar//v0.1A//ZH-CN"
+CALENDAR_NAME = "Codex 重置日历"
+EVENT_SUMMARY = "⚡ Codex Reset"
 
 
 class SyncError(Exception):
@@ -252,12 +254,18 @@ def build_description(event: dict[str, Any]) -> str:
     )
 
 
-def build_calendar(state: dict[str, Any]) -> bytes:
+def build_calendar(
+    state: dict[str, Any],
+    *,
+    calendar_name: str = CALENDAR_NAME,
+    event_summary: str = EVENT_SUMMARY,
+    description_override: str | None = None,
+) -> bytes:
     calendar = Calendar()
     calendar.add("prodid", CALENDAR_PRODID)
     calendar.add("version", "2.0")
     calendar.add("calscale", "GREGORIAN")
-    calendar.add("x-wr-calname", "Codex 重置日历")
+    calendar.add("x-wr-calname", calendar_name)
 
     current_event = state["currentEvent"]
     version = state["lastEventVersion"]
@@ -269,13 +277,18 @@ def build_calendar(state: dict[str, Any]) -> bytes:
 
         item = Event()
         item.add("uid", version["uid"])
-        item.add("summary", "⚡ Codex Reset")
+        item.add("summary", event_summary)
         item.add("dtstart", starts_at)
         item.add("dtend", starts_at + timedelta(minutes=5))
         item.add("dtstamp", modified_at)
         item.add("last-modified", modified_at)
         item.add("sequence", version["sequence"])
-        item.add("description", build_description(current_event))
+        item.add(
+            "description",
+            description_override
+            if description_override is not None
+            else build_description(current_event),
+        )
         item.add("url", current_event["sourceUrl"])
         item.add("transp", "TRANSPARENT")
 

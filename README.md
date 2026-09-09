@@ -4,7 +4,7 @@
 
 ## 当前阶段
 
-S1 本地转换与自动化测试已通过。当前可以在本地读取上游并生成稳定的状态文件和 ICS；GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未实施。仓库仍只有本地 Git 管理，没有远程或生产订阅地址。
+S2 自动化工作流与发布准备已在本地完成。当前已有定时/手动/默认分支/拉取请求流程、内容变化提交、Pages 明确部署、线上字节比较与失败恢复逻辑；实际 GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未执行。仓库仍只有本地 Git 管理，没有远程或生产订阅地址。
 
 ## 已确认范围
 
@@ -66,6 +66,39 @@ python3.12 -m venv .venv
 正式本地结果写入 `data/current.json` 和 `public/calendar/codex-reset.ics`。同步会先完整校验并生成两个候选文件；失败时保留上次成功结果。相同有效输入不会改变文件字节。
 
 S1 已在 2026-09-09 使用 Python 3.12 和 `icalendar==7.3.0` 运行 22 项测试，结果全部通过；实时上游核对当时为 `state=none`、零事件，重复同步无文件变化。此证据不代表云端或 iPhone 已验收。
+
+## 自动化与发布准备
+
+`.github/workflows/sync-calendar.yml` 的生产流程按每小时第 7、17、27、37、47、57 分钟运行，也支持手动运行和 `main` 更新；拉取请求只运行离线测试。生产同步命令固定为 `python scripts/sync_reset.py`，工作流不接受测试输入。
+
+生产流程先测试，再同步并仅提交 `data/current.json` 与 `public/calendar/codex-reset.ics`。它随后比较线上与本地 ICS：线上一致时不部署；404、内容不匹配或手动选择 `force_deploy` 时部署。部署后再次按字节核对；部署失败时，下一次运行会因线上不匹配重新部署。生产流程串行执行且不取消正在运行的发布。
+
+本地运行发布前检查：
+
+```bash
+.venv/bin/python scripts/pages_release.py validate-public --root public
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+当前公开白名单只有 `public/calendar/codex-reset.ics`。状态文件、日志、测试数据和其他文件都会被拒绝上传。
+
+独立验收日历使用同一 UID、版本、ICS 与双提醒生成逻辑，但标题和说明固定标注“验收测试，非真实 Reset”，输出路径必须与生产隔离。例如把测试文件写入临时目录：
+
+```bash
+.venv/bin/python scripts/acceptance_calendar.py \
+  --state-file /tmp/codex-reset-acceptance-current.json \
+  --output /tmp/codex-reset-acceptance.ics \
+  event --reset-at 2099-01-01T12:00:00Z --source-id acceptance-1
+
+.venv/bin/python scripts/acceptance_calendar.py \
+  --state-file /tmp/codex-reset-acceptance-current.json \
+  --output /tmp/codex-reset-acceptance.ics \
+  clear
+```
+
+验收事件要求至少安排在运行时刻两小时后。S2 只准备本地生成能力；独立测试 URL 需在 S3/S4 获得发布授权后再建立，生产工作流不会发布这些测试文件。
+
+GitHub Pages 必须在仓库设置中选择 **GitHub Actions** 作为发布源。公开仓库的定时工作流可能因 60 天无仓库活动而停用；维护者应每月检查 Actions，必要时从界面重新启用，不创建无意义保活提交。
 
 ## 来源与边界
 

@@ -1,0 +1,195 @@
+name: Sync and deploy reset calendar
+
+on:
+  schedule:
+    - cron: "7,17,27,37,47,57 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: Deploy even when the online calendar already matches
+        required: false
+        type: boolean
+        default: false
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      source_sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install fixed dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run offline tests
+        run: python -m unittest discover -s tests -v
+      - name: Record tested commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  prepare:
+    if: github.event_name != 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      should_deploy: ${{ steps.decision.outputs.should_deploy }}
+      source_sha: ${{ steps.source.outputs.sha }}
+      pages_ics_url: ${{ steps.url.outputs.pages_ics_url }}
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.test.outputs.source_sha }}
+          fetch-depth: 0
+      - name: Require the tested commit to be current main
+        shell: bash
+        run: |
+          git fetch origin main
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" || {
+            echo "main advanced after tests; a newer run must publish it" >&2
+            exit 1
+          }
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install fixed dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Synchronize the fixed production source
+        run: python scripts/sync_reset.py
+      - name: Reject unexpected generated files
+        shell: bash
+        run: |
+          status="$(git status --porcelain=v1 --untracked-files=all)"
+          while IFS= read -r line; do
+            test -z "$line" && continue
+            path="${line:3}"
+            case "$path" in
+              data/current.json|public/calendar/codex-reset.ics) ;;
+              *) echo "Unexpected generated path: $path" >&2; exit 1 ;;
+            esac
+          done <<< "$status"
+      - name: Commit meaningful content changes
+        shell: bash
+        run: |
+          if git diff --quiet -- data/current.json public/calendar/codex-reset.ics; then
+            echo "No content change; skipping commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- data/current.json public/calendar/codex-reset.ics
+          git commit -m "chore: sync reset calendar"
+          git push origin HEAD:main
+      - name: Record source commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Build canonical Pages URL
+        id: url
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: echo "pages_ics_url=https://${REPOSITORY_OWNER}.github.io/${REPOSITORY_NAME}/calendar/codex-reset.ics" >> "$GITHUB_OUTPUT"
+      - name: Compare online calendar
+        id: online
+        env:
+          PAGES_ICS_URL: ${{ steps.url.outputs.pages_ics_url }}
+        run: python scripts/pages_release.py compare --url "$PAGES_ICS_URL" --github-output "$GITHUB_OUTPUT"
+      - name: Decide whether to deploy
+        id: decision
+        env:
+          FORCE_DEPLOY: ${{ github.event_name == 'workflow_dispatch' && inputs.force_deploy || false }}
+          ONLINE_STATUS: ${{ steps.online.outputs.status }}
+        shell: bash
+        run: |
+          if test "$FORCE_DEPLOY" = "true"; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "reason=manual-force" >> "$GITHUB_OUTPUT"
+          elif test "$ONLINE_STATUS" != "match"; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "reason=online-$ONLINE_STATUS" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+            echo "reason=online-match" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-pages:
+    if: github.event_name != 'pull_request' && needs.prepare.outputs.should_deploy == 'true'
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out synchronized source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Enforce public artifact allowlist
+        run: python scripts/pages_release.py validate-public --root public
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: public
+
+  deploy-pages:
+    if: github.event_name != 'pull_request' && needs.prepare.outputs.should_deploy == 'true'
+    needs: [prepare, build-pages]
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  verify-pages:
+    if: github.event_name != 'pull_request' && needs.prepare.outputs.should_deploy == 'true'
+    needs: [prepare, deploy-pages]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out deployed source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.prepare.outputs.source_sha }}
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Verify deployed bytes
+        env:
+          PAGES_ICS_URL: ${{ needs.prepare.outputs.pages_ics_url }}
+        run: python scripts/pages_release.py verify --url "$PAGES_ICS_URL" --attempts 6 --retry-delay 10

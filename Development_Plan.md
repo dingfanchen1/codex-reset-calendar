@@ -85,7 +85,7 @@ S2 编写，S3 经发布授权后启用。定时入口为每小时第 7、17、2
 
 无内容变化不重复提交或部署。首次发布/手动恢复允许强制部署；在线 404 可视为首次发布，其他在线请求错误先重试并报告，不当成合法空日历。部署失败后下一次即使上游未变，仍依据线上不匹配重试。避免“文件已提交但线上永远停旧版本”。
 
-Pages Source 必须选择 GitHub Actions，使用官方 upload-pages-artifact/deploy-pages 流程。不能靠默认 GITHUB_TOKEN 推送触发分支式 Pages 构建。按实施时官方支持版本固定 Actions 引用。
+Pages Source 必须选择 GitHub Actions，使用官方 upload-pages-artifact/deploy-pages 流程。不能靠默认 GITHUB_TOKEN 推送触发分支式 Pages 构建。S2 按 2026-09-09 官方版本固定到不可变提交：checkout v7.0.1、setup-python v7.0.0、upload-pages-artifact v5.0.0、deploy-pages v5.0.1；版本与提交见工作流和 THIRD_PARTY_NOTICES.md。
 
 同步提交使用 contents:write，部署使用 pages:write 和 id-token:write，按 job 分配，使用内置令牌，不新增长期个人令牌。串行发布、不取消正在部署的运行、不强推解冲突、不无限重试。普通分支推送冲突使本轮失败并保留线上成功版本。
 
