@@ -69,7 +69,9 @@ S1 本地验证、S2 发布准备和 S3 公共服务验证已有执行记录；S
 - 前置：`main` 工作区清洁，HEAD 为 `4f198d6`，S3 公共服务验证通过且当前无其他实施者。
 - 隔离：生产 ICS 字节保持不变；测试日历使用独立路径 `acceptance/calendar/codex-reset-test.ics`，标题固定为“验收测试，非真实 Reset”，状态文件不公开。
 - 首个可见性事件：`sourceId=s4-visibility-1`，UTC 时间 `2026-09-11T03:00:00Z`，对应北京时间 2026-09-11 11:00；生成时距事件约 16 小时。
-- 当前边界：本地生成和 41 项回归已通过；测试 URL、iPhone 订阅、刷新与通知结果仍待取得，不能据此填写证据表为通过。
+- 发布：提交 `79005c8` 已推送；运行 [34468692967](https://github.com/dingfanchen1/codex-reset-calendar/actions/runs/34468692967) 的测试、两个线上比较、Pages 部署和两个部署后字节核对均成功。
+- 线上：测试 URL <https://dingfanchen1.github.io/codex-reset-calendar/acceptance/calendar/codex-reset-test.ics> 匿名返回 HTTP 200 和 `text/calendar`，SHA-256 与本地均为 `df7dbf14535c75484c57cd322817281f7a787ed0089a05a2df7dfff4739aab9c`；生产 ICS 仍为原 SHA-256 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`。
+- 当前边界：线上测试源已准备；iPhone 订阅、刷新与通知结果仍待取得，不能据此填写证据表为通过。
 
 ### 准备
 
