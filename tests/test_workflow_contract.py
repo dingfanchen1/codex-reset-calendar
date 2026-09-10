@@ -55,6 +55,16 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertIn("path: public", self.workflow)
         self.assertIn("validate-public --root public", self.workflow)
 
+    def test_acceptance_calendar_is_compared_and_verified_separately(self) -> None:
+        self.assertIn(
+            "public/acceptance/calendar/codex-reset-test.ics", self.workflow
+        )
+        self.assertIn(
+            "/acceptance/calendar/codex-reset-test.ics", self.workflow
+        )
+        self.assertIn("ONLINE_ACCEPTANCE_STATUS", self.workflow)
+        self.assertGreaterEqual(self.workflow.count("scripts/pages_release.py verify"), 2)
+
     def test_pull_requests_cannot_enter_production_jobs(self) -> None:
         self.assertGreaterEqual(
             self.workflow.count("if: github.event_name != 'pull_request'"), 4

@@ -3,12 +3,12 @@
 ## 当前状态
 
 - 版本范围：Codex 重置公共日历 v0.1A。
-- 当前实施者：无。
+- 当前实施者：S4 窗口 `01a08566-609c-7f11-bc15-9e7d70727575`，iPhone 订阅与双提醒实机验收进行中。
 - S0：完成。项目规范基线提交为 `562d681`，四个阶段窗口已创建并完成首次只读检查。
 - S1：本地验证通过；同步脚本、固定依赖、状态与 ICS、固定样例及 22 项 unittest 已完成。
 - S2：发布准备完成；本地工作流检查、发布模拟和 39 项回归已通过，云端未验证。
 - S3：公共服务验证通过；公开仓库、Pages、手动运行、真实定时运行、无变化行为和故障模拟均有云端证据。
-- S4：可开始实机验收。
+- S4：实机验收进行中。
 - 远程：`origin` 为 `https://github.com/dingfanchen1/codex-reset-calendar.git`，默认分支为 `main`。
 - 生产订阅地址：`https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`。
 - 代码/依赖/测试/工作流：本地与 GitHub Actions 均已验证。

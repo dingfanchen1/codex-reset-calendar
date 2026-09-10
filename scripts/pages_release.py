@@ -17,7 +17,13 @@ from typing import Any, Callable
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_PUBLIC_ROOT = PROJECT_ROOT / "public"
 DEFAULT_ICS_PATH = DEFAULT_PUBLIC_ROOT / "calendar" / "codex-reset.ics"
-ALLOWED_PUBLIC_FILES = {Path("calendar/codex-reset.ics")}
+ACCEPTANCE_ICS_PATH = (
+    DEFAULT_PUBLIC_ROOT / "acceptance" / "calendar" / "codex-reset-test.ics"
+)
+ALLOWED_PUBLIC_FILES = {
+    Path("calendar/codex-reset.ics"),
+    Path("acceptance/calendar/codex-reset-test.ics"),
+}
 
 
 class PagesReleaseError(Exception):
@@ -57,13 +63,18 @@ def validate_public_tree(root: Path = DEFAULT_PUBLIC_ROOT) -> dict[str, Any]:
             details.append(f"不允许公开: {', '.join(unexpected)}")
         raise PagesReleaseError("；".join(details))
 
-    calendar_path = root / "calendar" / "codex-reset.ics"
-    content = calendar_path.read_bytes()
-    if not content:
+    production_path = root / "calendar" / "codex-reset.ics"
+    acceptance_path = root / "acceptance" / "calendar" / "codex-reset-test.ics"
+    production_content = production_path.read_bytes()
+    acceptance_content = acceptance_path.read_bytes()
+    if not production_content:
         raise PagesReleaseError("生产 ICS 不能为空文件")
+    if not acceptance_content:
+        raise PagesReleaseError("验收 ICS 不能为空文件")
     return {
-        "files": ["calendar/codex-reset.ics"],
-        "calendarSha256": sha256(content),
+        "files": sorted(str(path) for path in ALLOWED_PUBLIC_FILES),
+        "calendarSha256": sha256(production_content),
+        "acceptanceCalendarSha256": sha256(acceptance_content),
     }
 
 

@@ -55,6 +55,7 @@ jobs:
       should_deploy: ${{ steps.decision.outputs.should_deploy }}
       source_sha: ${{ steps.source.outputs.sha }}
       pages_ics_url: ${{ steps.url.outputs.pages_ics_url }}
+      acceptance_ics_url: ${{ steps.url.outputs.acceptance_ics_url }}
     steps:
       - name: Check out default branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -110,28 +111,40 @@ jobs:
         env:
           REPOSITORY_NAME: ${{ github.event.repository.name }}
           REPOSITORY_OWNER: ${{ github.repository_owner }}
-        run: echo "pages_ics_url=https://${REPOSITORY_OWNER}.github.io/${REPOSITORY_NAME}/calendar/codex-reset.ics" >> "$GITHUB_OUTPUT"
-      - name: Compare online calendar
-        id: online
+        shell: bash
+        run: |
+          echo "pages_ics_url=https://${REPOSITORY_OWNER}.github.io/${REPOSITORY_NAME}/calendar/codex-reset.ics" >> "$GITHUB_OUTPUT"
+          echo "acceptance_ics_url=https://${REPOSITORY_OWNER}.github.io/${REPOSITORY_NAME}/acceptance/calendar/codex-reset-test.ics" >> "$GITHUB_OUTPUT"
+      - name: Compare online production calendar
+        id: online_production
         env:
           PAGES_ICS_URL: ${{ steps.url.outputs.pages_ics_url }}
         run: python scripts/pages_release.py compare --url "$PAGES_ICS_URL" --github-output "$GITHUB_OUTPUT"
+      - name: Compare online acceptance calendar
+        id: online_acceptance
+        env:
+          ACCEPTANCE_ICS_URL: ${{ steps.url.outputs.acceptance_ics_url }}
+        run: python scripts/pages_release.py compare --local public/acceptance/calendar/codex-reset-test.ics --url "$ACCEPTANCE_ICS_URL" --github-output "$GITHUB_OUTPUT"
       - name: Decide whether to deploy
         id: decision
         env:
           FORCE_DEPLOY: ${{ github.event_name == 'workflow_dispatch' && inputs.force_deploy || false }}
-          ONLINE_STATUS: ${{ steps.online.outputs.status }}
+          ONLINE_PRODUCTION_STATUS: ${{ steps.online_production.outputs.status }}
+          ONLINE_ACCEPTANCE_STATUS: ${{ steps.online_acceptance.outputs.status }}
         shell: bash
         run: |
           if test "$FORCE_DEPLOY" = "true"; then
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
             echo "reason=manual-force" >> "$GITHUB_OUTPUT"
-          elif test "$ONLINE_STATUS" != "match"; then
+          elif test "$ONLINE_PRODUCTION_STATUS" != "match"; then
             echo "should_deploy=true" >> "$GITHUB_OUTPUT"
-            echo "reason=online-$ONLINE_STATUS" >> "$GITHUB_OUTPUT"
+            echo "reason=production-$ONLINE_PRODUCTION_STATUS" >> "$GITHUB_OUTPUT"
+          elif test "$ONLINE_ACCEPTANCE_STATUS" != "match"; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+            echo "reason=acceptance-$ONLINE_ACCEPTANCE_STATUS" >> "$GITHUB_OUTPUT"
           else
             echo "should_deploy=false" >> "$GITHUB_OUTPUT"
-            echo "reason=online-match" >> "$GITHUB_OUTPUT"
+            echo "reason=all-online-match" >> "$GITHUB_OUTPUT"
           fi
 
   build-pages:
@@ -193,3 +206,7 @@ jobs:
         env:
           PAGES_ICS_URL: ${{ needs.prepare.outputs.pages_ics_url }}
         run: python scripts/pages_release.py verify --url "$PAGES_ICS_URL" --attempts 6 --retry-delay 10
+      - name: Verify deployed acceptance bytes
+        env:
+          ACCEPTANCE_ICS_URL: ${{ needs.prepare.outputs.acceptance_ics_url }}
+        run: python scripts/pages_release.py verify --local public/acceptance/calendar/codex-reset-test.ics --url "$ACCEPTANCE_ICS_URL" --attempts 6 --retry-delay 10

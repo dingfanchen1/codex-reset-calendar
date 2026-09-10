@@ -28,14 +28,26 @@ class PagesReleaseCase(unittest.TestCase):
         self.local_path = root / "public" / "calendar" / "codex-reset.ics"
         self.local_path.parent.mkdir(parents=True)
         self.local_path.write_bytes(b"calendar-v1")
+        self.acceptance_path = (
+            root / "public" / "acceptance" / "calendar" / "codex-reset-test.ics"
+        )
+        self.acceptance_path.parent.mkdir(parents=True)
+        self.acceptance_path.write_bytes(b"acceptance-calendar-v1")
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
-    def test_public_tree_contains_only_production_calendar(self) -> None:
+    def test_public_tree_contains_only_the_two_explicit_calendars(self) -> None:
         result = pages_release.validate_public_tree(self.local_path.parents[1])
 
-        self.assertEqual(result["files"], ["calendar/codex-reset.ics"])
+        self.assertEqual(
+            result["files"],
+            [
+                "acceptance/calendar/codex-reset-test.ics",
+                "calendar/codex-reset.ics",
+            ],
+        )
+        self.assertIn("acceptanceCalendarSha256", result)
 
     def test_public_tree_rejects_unexpected_file(self) -> None:
         secret = self.local_path.parents[1] / "debug.log"

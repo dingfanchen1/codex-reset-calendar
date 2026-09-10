@@ -4,12 +4,13 @@
 
 ## 当前阶段
 
-S3 公共服务验证已通过。公开仓库、GitHub Actions 发布源、首次部署、无变化运行和真实定时运行均已验证；公共 ICS 可匿名访问并与仓库产物一致。iPhone 订阅、刷新和两次通知仍需 S4 实机验收。
+S3 公共服务验证已通过。S4 实机验收正在进行；生产订阅、独立测试订阅的刷新行为和两次实际通知仍需分别取得 iPhone 证据。
 
 ## 订阅地址
 
 - HTTPS：<https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics>
 - Apple 日历订阅：`webcal://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`
+- S4 独立测试日历：<https://dingfanchen1.github.io/codex-reset-calendar/acceptance/calendar/codex-reset-test.ics>
 - 公开仓库：<https://github.com/dingfanchen1/codex-reset-calendar>
 
 ## 已确认范围
@@ -86,7 +87,7 @@ S1 已在 2026-09-09 使用 Python 3.12 和 `icalendar==7.3.0` 运行 22 项测�
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前公开白名单只有 `public/calendar/codex-reset.ics`。状态文件、日志、测试数据和其他文件都会被拒绝上传。
+当前公开白名单只有生产日历 `public/calendar/codex-reset.ics` 和明确标注的 S4 测试日历 `public/acceptance/calendar/codex-reset-test.ics`。状态文件、日志、固定样例和其他文件都会被拒绝上传。
 
 独立验收日历使用同一 UID、版本、ICS 与双提醒生成逻辑，但标题和说明固定标注“验收测试，非真实 Reset”，输出路径必须与生产隔离。例如把测试文件写入临时目录：
 
@@ -102,7 +103,7 @@ S1 已在 2026-09-09 使用 Python 3.12 和 `icalendar==7.3.0` 运行 22 项测�
   clear
 ```
 
-验收事件要求至少安排在运行时刻两小时后。S2 只准备本地生成能力；独立测试 URL 需在 S3/S4 获得发布授权后再建立，生产工作流不会发布这些测试文件。
+验收事件要求至少安排在运行时刻两小时后。S4 使用同一生成逻辑把测试日历写入独立路径，状态保存在不公开的 `acceptance/data/current.json`。生产同步命令仍只读取固定上游，不接受测试输入；Pages 会分别比较并核对生产和测试 ICS，任一线上文件落后时才重新部署。
 
 GitHub Pages 必须在仓库设置中选择 **GitHub Actions** 作为发布源。公开仓库的定时工作流可能因 60 天无仓库活动而停用；维护者应每月检查 Actions，必要时从界面重新启用，不创建无意义保活提交。
 

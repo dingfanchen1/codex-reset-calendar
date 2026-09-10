@@ -19,7 +19,7 @@ else:
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STATE_PATH = PROJECT_ROOT / "acceptance" / "data" / "current.json"
 DEFAULT_ICS_PATH = (
-    PROJECT_ROOT / "acceptance" / "public" / "calendar" / "codex-reset-test.ics"
+    PROJECT_ROOT / "public" / "acceptance" / "calendar" / "codex-reset-test.ics"
 )
 TEST_LABEL = "验收测试，非真实 Reset"
 TEST_DESCRIPTION = "\n".join(

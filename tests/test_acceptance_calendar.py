@@ -15,6 +15,14 @@ FIRST_TIME = datetime(2026, 9, 9, 12, tzinfo=timezone.utc)
 
 
 class AcceptanceCalendarTests(unittest.TestCase):
+    def test_default_output_is_separate_from_production_calendar(self) -> None:
+        self.assertEqual(
+            acceptance_calendar.DEFAULT_ICS_PATH.relative_to(
+                acceptance_calendar.PROJECT_ROOT
+            ),
+            Path("public/acceptance/calendar/codex-reset-test.ics"),
+        )
+
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         root = Path(self.temp_dir.name)
