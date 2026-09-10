@@ -3,23 +3,24 @@
 ## 当前状态
 
 - 版本范围：Codex 重置公共日历 v0.1A。
-- 当前实施者：S3 窗口 `01a08566-696b-7210-8fb4-4375d8f33575`；发布前检查已完成，等待公开发布授权。
+- 当前实施者：无。
 - S0：完成。项目规范基线提交为 `562d681`，四个阶段窗口已创建并完成首次只读检查。
 - S1：本地验证通过；同步脚本、固定依赖、状态与 ICS、固定样例及 22 项 unittest 已完成。
 - S2：发布准备完成；本地工作流检查、发布模拟和 39 项回归已通过，云端未验证。
-- S3：发布前检查通过；目标账号、仓库名、分支、提交、公开清单和本地凭据状态已核对，等待远程创建/推送授权；GitHub Actions 与 Pages 均未验证。
-- S4：待验收，前置 S3 未通过。
-- 远程：未配置；生产订阅地址：不存在。
-- 代码/依赖/测试/工作流：S2 本地准备与验证已完成；云端工作流尚未运行。
-- 公开发布和 iPhone 实机验证：未进行。
+- S3：公共服务验证通过；公开仓库、Pages、手动运行、真实定时运行、无变化行为和故障模拟均有云端证据。
+- S4：可开始实机验收。
+- 远程：`origin` 为 `https://github.com/dingfanchen1/codex-reset-calendar.git`，默认分支为 `main`。
+- 生产订阅地址：`https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`。
+- 代码/依赖/测试/工作流：本地与 GitHub Actions 均已验证。
+- 公开发布：完成；iPhone 实机验证：未进行。
 
 ## 最近验收
 
-2026-09-09 S3 发布前核验：`main` 工作区清洁，HEAD 为 `0cfc268`；39 项 unittest 和公开白名单复核通过，公开 artifact 仅含 `calendar/codex-reset.ics`，SHA-256 为 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`。GitHub CLI 已登录账号 `dingfanchen1`；截至 2026-09-09T15:40:38Z，`dingfanchen1/codex-reset-calendar` 不存在。当前树及 Git 历史未命中常见密钥模式，未发现超过 1 MiB 的已跟踪文件。以上是发布前检查，不是公开或云端验收证据。
+2026-09-10 S3 公共服务核验：公开 ICS 匿名请求返回 HTTP 200 和 `text/calendar`，UTF-8、CRLF 与解析均通过，日历名称为“Codex 重置日历”，当前零事件；线上与本地 SHA-256 均为 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`。首次发布、手动无变化运行和真实定时运行均成功；无变化时没有同步提交或重复部署。详细链接见 Manual_Verification_Guide.md。
 
 ## 下一阶段
 
-等待用户明确授权：在账号 `dingfanchen1` 创建公开仓库 `codex-reset-calendar`，把本地 `main` 推送为默认分支，并把 Pages 发布源配置为 GitHub Actions。取得授权后继续首次工作流与公共服务验收；不启动 S4。
+由用户在 S4 窗口 `01a08566-609c-7f11-bc15-9e7d70727575` 发送“开始 S4”，再进行 iPhone 订阅、更新和双提醒实机验收。S3 不代用户启动 S4。
 
 ## 交接记录
 
@@ -46,11 +47,12 @@
 - 限制：无远程、无 Actions 运行、无 Pages 配置或公共 URL；独立验收日历当前仅有本地生成能力，未公开；iPhone 未验收。
 - 下一阶段输入：已固定的官方 Actions 引用、只含生产 ICS 的公开白名单、手动强制部署入口、线上比较与恢复逻辑；S3 先核对公开清单和账号，取得独立授权后再创建/推送/部署。
 
-### S3 GitHub Pages 发布与线上验收（进行中）
+### S3 GitHub Pages 发布与线上验收（已完成）
 
-- 完成内容：复核 S2 提交与清洁工作区；核对 GitHub 登录账号、拟定仓库是否存在、`main` 与 HEAD、公开 artifact、完整已跟踪文件清单和常见密钥模式。
-- 验证：39 项 unittest 通过；公开白名单通过；GitHub 账号为 `dingfanchen1`，拟定公开仓库截至 2026-09-09T15:40:38Z 不存在；未创建远程、未推送、未部署。
-- 限制：等待独立公开发布授权；公共 ICS、手动工作流、真实定时运行、无变化运行和故障恢复均尚无云端证据。
-- 下一阶段输入：授权后创建 `dingfanchen1/codex-reset-calendar`，推送 `main`，配置 Pages 的 GitHub Actions 发布源并执行 S3 验收；不进入 S4。
+- 完成内容：创建公开仓库并推送 `main`；配置 Pages 的 GitHub Actions 发布源；完成首次部署、匿名公共 ICS 核对、无变化手动运行、真实定时运行和云端故障模拟。
+- 验证：首次运行 `34372887540`、手动运行 `34373133962`、真实定时运行 `34443169054` 均成功；公开 ICS 为 HTTP 200、`text/calendar`、UTF-8、CRLF、可解析且与本地字节一致；无变化运行未提交或部署。
+- 证据：生产地址 `https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`；运行链接和故障模拟边界见 Manual_Verification_Guide.md。
+- 限制：故障行为由 GitHub Actions 中的固定模拟测试验证，没有故意破坏生产部署；iPhone 的订阅刷新与两个实际通知均待 S4。
+- 下一阶段输入：固定生产订阅地址、当前零事件日历和独立验收日历生成器；S4 使用独立测试源完成改期、替换、清空和双提醒实机验收。
 
 后续每阶段追加同样结构：完成内容、测试命令与结果、证据、限制、下一阶段输入。不得把待验收项提前标为通过。

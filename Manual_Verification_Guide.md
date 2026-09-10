@@ -1,6 +1,6 @@
 # 手动验收指南
 
-当前为待执行步骤，全部验收结果均未取得。按 S1 → S2 → S3 → S4 依次记录，不能以计划步骤当作证据。
+S1 本地验证、S2 发布准备和 S3 公共服务验证已有执行记录；S4 实机验收尚未开始。按 S1 → S2 → S3 → S4 依次记录，不能以计划步骤当作证据。
 
 ## S1 本地核对
 
@@ -51,6 +51,16 @@
 - 公开 artifact：白名单复核通过，仅含 `calendar/codex-reset.ics`；SHA-256 为 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`。
 - 代码检查：39 项 unittest 全部通过；当前树及 Git 历史未命中常见密钥模式，未发现超过 1 MiB 的已跟踪文件。
 - 授权边界：尚未创建公开仓库、配置远程、推送、启用 Pages 或运行云端工作流。上述动作等待用户单独明确授权。
+
+### S3 公共服务执行记录（2026-09-09 至 2026-09-10）
+
+- 仓库与 Pages：公开仓库为 <https://github.com/dingfanchen1/codex-reset-calendar>，默认分支 `main`；Pages 使用 GitHub Actions 发布源并强制 HTTPS。
+- 首次发布：运行 [34372887540](https://github.com/dingfanchen1/codex-reset-calendar/actions/runs/34372887540) 成功，测试、生产同步、artifact、部署及部署后字节核对全部通过。
+- 公共文件：<https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics> 匿名请求返回 HTTP 200 和 `text/calendar`；UTF-8、CRLF、ICS 解析及“Codex 重置日历”名称核对通过。2026-09-10T10:31:42Z 线上与本地 SHA-256 均为 `a7fbb8794f69de93e0d00105a83afc6def846df682f5610ed258a4a8602b1925`，当前为零事件。
+- 手动无变化：运行 [34373133962](https://github.com/dingfanchen1/codex-reset-calendar/actions/runs/34373133962) 成功，日志为 `changed=false`、`No content change`、`online-match`；发布 jobs 全部跳过，远端提交未变化。
+- 真实定时：运行 [34443169054](https://github.com/dingfanchen1/codex-reset-calendar/actions/runs/34443169054) 由 `schedule` 触发并成功，日志同样为 `changed=false` 和 `online-match`；没有同步提交或重复部署。
+- 故障模拟：上述真实定时运行的云端 test job 通过了网络错误重试、非法输入保留旧产物、暂时在线错误恢复以及部署后持续不匹配失败等固定测试。没有故意制造真实平台故障；生产 ICS 在验证前后均保持 HTTP 200 和字节一致。
+- S3 结论：公共服务验证通过。iPhone 是否及时刷新及两个 VALARM 是否真实通知仍待 S4，不能由本次结果代替。
 
 ## S4 iPhone 实机
 

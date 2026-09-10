@@ -4,7 +4,13 @@
 
 ## 当前阶段
 
-S3 发布前检查已通过，当前等待单独的公开发布授权。拟定目标为 GitHub 账号 `dingfanchen1` 下的公开仓库 `codex-reset-calendar`；截至 2026-09-09T15:40:38Z，该仓库不存在，本地也未配置远程。实际 GitHub Actions、GitHub Pages 与 iPhone 实机验收尚未执行，生产订阅地址仍不存在。
+S3 公共服务验证已通过。公开仓库、GitHub Actions 发布源、首次部署、无变化运行和真实定时运行均已验证；公共 ICS 可匿名访问并与仓库产物一致。iPhone 订阅、刷新和两次通知仍需 S4 实机验收。
+
+## 订阅地址
+
+- HTTPS：<https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics>
+- Apple 日历订阅：`webcal://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`
+- 公开仓库：<https://github.com/dingfanchen1/codex-reset-calendar>
 
 ## 已确认范围
 
