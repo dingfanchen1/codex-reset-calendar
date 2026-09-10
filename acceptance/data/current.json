@@ -1,10 +1,17 @@
 {
-  "currentEvent": null,
+  "currentEvent": {
+    "confidence": "high",
+    "resetAt": "2026-09-11T08:58:00Z",
+    "sourceAuthor": "thsottiaux",
+    "sourceId": "s4-notification-3",
+    "sourceUrl": "https://github.com/",
+    "state": "scheduled"
+  },
   "lastEventVersion": {
-    "modifiedAt": "2026-09-10T11:49:34Z",
+    "modifiedAt": "2026-09-10T18:33:14Z",
     "sequence": 0,
-    "sourceId": "s4-replacement-2",
-    "uid": "codex-reset-s4-replacement-2@codex-reset-calendar"
+    "sourceId": "s4-notification-3",
+    "uid": "codex-reset-s4-notification-3@codex-reset-calendar"
   },
   "stateSchemaVersion": 1
 }
