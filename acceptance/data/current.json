@@ -1,12 +1,5 @@
 {
-  "currentEvent": {
-    "confidence": "high",
-    "resetAt": "2026-09-11T05:00:00Z",
-    "sourceAuthor": "thsottiaux",
-    "sourceId": "s4-replacement-2",
-    "sourceUrl": "https://github.com/",
-    "state": "scheduled"
-  },
+  "currentEvent": null,
   "lastEventVersion": {
     "modifiedAt": "2026-09-10T11:49:34Z",
     "sequence": 0,
