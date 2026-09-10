@@ -8,11 +8,11 @@
 - S1：本地验证通过；同步脚本、固定依赖、状态与 ICS、固定样例及 22 项 unittest 已完成。
 - S2：发布准备完成；本地工作流检查、发布模拟和 39 项回归已通过，云端未验证。
 - S3：公共服务验证通过；公开仓库、Pages、手动运行、真实定时运行、无变化行为和故障模拟均有云端证据。
-- S4：实机验收进行中；独立测试 URL 已发布并验证，等待 iPhone 订阅及刷新证据。
+- S4：实机验收进行中；生产订阅和初始测试事件可见性已通过，正在验证同 UID 改期。
 - 远程：`origin` 为 `https://github.com/dingfanchen1/codex-reset-calendar.git`，默认分支为 `main`。
 - 生产订阅地址：`https://dingfanchen1.github.io/codex-reset-calendar/calendar/codex-reset.ics`。
 - 代码/依赖/测试/工作流：本地与 GitHub Actions 均已验证。
-- 公开发布：完成；iPhone 实机验证：未进行。
+- 公开发布：完成；iPhone 实机验证：部分通过，改期、替换、清空和双提醒待验收。
 
 ## 最近验收
 
@@ -20,7 +20,7 @@
 
 ## 下一阶段
 
-由用户在 S4 窗口 `01a08566-609c-7f11-bc15-9e7d70727575` 发送“开始 S4”，再进行 iPhone 订阅、更新和双提醒实机验收。S3 不代用户启动 S4。
+发布同 UID 改期版本并等待原 iPhone 订阅自动刷新；确认无重复后继续新 UID 替换、清空和双提醒。
 
 ## 交接记录
 
